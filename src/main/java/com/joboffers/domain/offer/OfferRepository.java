@@ -1,6 +1,6 @@
 package com.joboffers.domain.offer;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-interface OfferRepository extends JpaRepository<Offer, Long> {
+interface OfferRepository extends MongoRepository<Offer, Long> {
 }

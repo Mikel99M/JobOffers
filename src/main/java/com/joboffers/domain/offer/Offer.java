@@ -24,6 +24,7 @@ public class Offer {
     private String description;
     private String company;
     private LocalDateTime publicationDate;
+    private String offerUrl;
     private boolean isActive;
     private List<User> usersApplyingForJob;
 

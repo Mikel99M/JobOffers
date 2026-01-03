@@ -42,55 +42,19 @@ class OfferRepositoryStub implements OfferRepository {
         db.remove(id);
     }
 
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public <S extends Offer> S saveAndFlush(final S entity) {
-        return null;
-    }
-
-    @Override
-    public <S extends Offer> List<S> saveAllAndFlush(final Iterable<S> entities) {
-        return List.of();
-    }
-
-    @Override
-    public void deleteAllInBatch(final Iterable<Offer> entities) {
-
-    }
-
-    @Override
-    public void deleteAllByIdInBatch(final Iterable<Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAllInBatch() {
-
-    }
-
-    @Override
-    public Offer getOne(final Long aLong) {
-        return null;
-    }
-
-    @Override
-    public Offer getById(final Long aLong) {
-        return null;
-    }
-
-    @Override
-    public Offer getReferenceById(final Long aLong) {
-        return null;
-    }
-
     @Override
     public <S extends Offer> Optional<S> findOne(final Example<S> example) {
         return Optional.empty();
+    }
+
+    @Override
+    public <S extends Offer> S insert(final S entity) {
+        return null;
+    }
+
+    @Override
+    public <S extends Offer> List<S> insert(final Iterable<S> entities) {
+        return List.of();
     }
 
     @Override

@@ -1,4 +1,10 @@
 package com.joboffers.domain.offer;
 
-class OfferFetcherStub implements OfferFetcherInterface {
+import java.util.List;
+
+class OfferFetcherStub implements OfferFetchable {
+    @Override
+    public List<JobOfferResponse> fetchOffers() {
+        return List.of();
+    }
 }

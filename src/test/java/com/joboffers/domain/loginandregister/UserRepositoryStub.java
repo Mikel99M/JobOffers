@@ -57,53 +57,13 @@ class UserRepositoryStub implements UserRepository {
     }
 
     @Override
-    public void deleteInBatch(final Iterable<User> entities) {
-        UserRepository.super.deleteInBatch(entities);
-    }
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public <S extends User> S saveAndFlush(final S entity) {
+    public <S extends User> S insert(final S entity) {
         return null;
     }
 
     @Override
-    public <S extends User> List<S> saveAllAndFlush(final Iterable<S> entities) {
+    public <S extends User> List<S> insert(final Iterable<S> entities) {
         return List.of();
-    }
-
-    @Override
-    public void deleteAllInBatch(final Iterable<User> entities) {
-
-    }
-
-    @Override
-    public void deleteAllByIdInBatch(final Iterable<Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAllInBatch() {
-
-    }
-
-    @Override
-    public User getOne(final Long aLong) {
-        return null;
-    }
-
-    @Override
-    public User getById(final Long aLong) {
-        return null;
-    }
-
-    @Override
-    public User getReferenceById(final Long aLong) {
-        return null;
     }
 
     @Override
@@ -140,7 +100,6 @@ class UserRepositoryStub implements UserRepository {
     public <S extends User, R> R findBy(final Example<S> example, final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
     }
-
 
     @Override
     public <S extends User> List<S> saveAll(final Iterable<S> entities) {

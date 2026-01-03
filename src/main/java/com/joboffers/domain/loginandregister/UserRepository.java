@@ -1,10 +1,10 @@
 package com.joboffers.domain.loginandregister;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-interface UserRepository extends JpaRepository<User, Long> {
+interface UserRepository extends MongoRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
