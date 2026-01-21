@@ -3,6 +3,7 @@ package com.joboffers.domain.offer;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class OffersFacade {
@@ -10,16 +11,16 @@ public class OffersFacade {
     private final OfferRepository offerRepository;
     private final OfferMapperInterface offerMapper;
     private final OfferFetchable offerFetcher;
+    private final OfferService offerService;
 
     public OfferResponseDto addOffer(OfferRequestDto offerDto) {
-
         Offer offer = offerMapper.mapOfferRequestDtoToOffer(offerDto);
         Offer savedOffer = offerRepository.save(offer);
         return offerMapper.mapOfferToOfferResponseDto(savedOffer);
     }
 
-    public OfferResponseDto fetchOfferById(Long id) {
-        Offer offer = offerRepository.findById(id).orElseThrow(() -> new NoOfferFoundException("No offer found with id: " + id));
+    public OfferResponseDto fetchOfferById(String id) {
+        Offer offer = offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException("No offer found with id: " + id));
         return offerMapper.mapOfferToOfferResponseDto(offer);
     }
 
@@ -30,20 +31,21 @@ public class OffersFacade {
                 .toList();
     }
 
-    public void activateOrDeactivateOffer(Long id) {
-        Offer offer = offerRepository.findById(id).orElseThrow(() -> new NoOfferFoundException("No offer found with id: " + id));
+    public void activateOrDeactivateOffer(String id) {
+        Offer offer = offerRepository.findById(id).orElseThrow(() -> new OfferNotFoundException("No offer found with id: " + id));
 
         offer.setActive(!offer.isActive());
         offerRepository.save(offer);
     }
 
-    public void deleteOfferById(Long id) {
+    public void deleteOfferById(String id) {
         offerRepository.deleteById(id);
     }
 
-    public void fetchAllOffersAndSaveIfNotExists() {
-
+    public List<OfferResponseDto> fetchAllOffersAndSaveIfNotExists() {
+        return offerService.fetchAllOffersAndSaveIfNotExists().stream()
+                .map(offerMapper::mapOfferToOfferResponseDto)
+                .collect(Collectors.toList());
     }
-
 
 }

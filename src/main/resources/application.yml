@@ -1,11 +1,19 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://admin:admin@localhost:27017/jobOffers
+      auto-index-creation: true
+      uri: mongodb://root:example@localhost:27017/JobOffers-web?authSource=admin
+  task:
+    scheduling:
+      enabled: false
+
 offers:
   http:
     client:
       config:
-        uri: http://ec2-3-127-218-34.eu-central-1.compute.amazonaws.com:5057/offers
+        uri: http://ec2-3-127-218-34.eu-central-1.compute.amazonaws.com
         port: 5057
         readTimeout: 1000
+  scheduler:
+    request:
+      delay: "*/10 * * * * *"

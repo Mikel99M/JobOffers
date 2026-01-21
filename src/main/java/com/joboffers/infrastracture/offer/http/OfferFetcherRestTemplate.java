@@ -7,11 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -25,37 +26,45 @@ import java.util.List;
 public class OfferFetcherRestTemplate implements OfferFetchable {
 
     private final RestTemplate restTemplate;
+    private final HttpClientConfigProperties properties;
 
     @Override
     public List<JobOfferResponse> fetchOffers() {
         log.info("Fetching job offers from external service...");
 
-        String url = UriComponentsBuilder
-                .fromHttpUrl("http://ec2-3-127-218-34.eu-central-1.compute.amazonaws.com:5057/offers")
-                .toUriString();
+        String url = getUrlForService("/offers");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.set(HttpHeaders.CONNECTION, "close");
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         try {
+            ResponseEntity<String> rawResponse = restTemplate.exchange(
+                    url, HttpMethod.GET, requestEntity, String.class);
+
             ResponseEntity<List<JobOfferResponse>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    HttpEntity.EMPTY,
+                    url, HttpMethod.GET, requestEntity,
                     new ParameterizedTypeReference<List<JobOfferResponse>>() {
-                    }
-            );
+                    });
 
             List<JobOfferResponse> offers = response.getBody();
+            log.info("Successfully fetched {} offers", offers != null ? offers.size() : 0);
+            return offers != null ? offers : Collections.emptyList();
 
-            if (!offers.isEmpty()) {
-                log.info("Found {} job offers", offers.size());
-                return offers;
-            } else {
-                log.info("No job offers found");
-                return Collections.emptyList();
-            }
-
-        } catch (ResourceAccessException e) {
-            log.error("Error while connecting to the offers service: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Offer service is down");
+        } catch (Exception e) {
+            log.error("FAILED TO FETCH OFFERS FROM EXTERNAL SERVICE", e);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "External offer service failed: " + e.getMessage(), e);
         }
+    }
+
+    private String getUrlForService(String path) {
+        return UriComponentsBuilder
+                .fromHttpUrl(properties.uri()) // http://ec2-3-127-218-34.eu-central-1.compute.amazonaws.com
+                .port(properties.port())       // 5057
+                .path(path)                    // /offers
+                .toUriString();
     }
 }

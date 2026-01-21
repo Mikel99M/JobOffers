@@ -1,6 +1,9 @@
 package com.joboffers.domain.offer;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
-interface OfferRepository extends MongoRepository<Offer, Long> {
+@Repository
+interface OfferRepository extends MongoRepository<Offer, String> {
+    boolean existsByOfferUrl(String offerUrl);
 }

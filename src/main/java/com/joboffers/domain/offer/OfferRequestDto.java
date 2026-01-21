@@ -1,11 +1,10 @@
 package com.joboffers.domain.offer;
 
-import java.time.LocalDateTime;
-
-record OfferRequestDto(
+public record OfferRequestDto(
 
         String title,
         String description,
+        String offerUrl,
         String company
 
 ) {

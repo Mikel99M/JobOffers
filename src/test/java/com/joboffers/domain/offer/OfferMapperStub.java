@@ -9,6 +9,7 @@ class OfferMapperStub implements OfferMapperInterface {
         Offer offer = new Offer();
         offer.setTitle(dto.title());
         offer.setDescription(dto.description());
+        offer.setOfferUrl(dto.offerUrl());
         offer.setCompany(dto.company());
         offer.setActive(true);
         offer.setPublicationDate(LocalDateTime.now());
@@ -25,5 +26,10 @@ class OfferMapperStub implements OfferMapperInterface {
                 .publicationDate(offer.getPublicationDate())
                 .isActive(offer.isActive())
                 .build();
+    }
+
+    @Override
+    public Offer mapJobOfferResponseToOfferEntity(final JobOfferResponse response) {
+        return null;
     }
 }

@@ -5,12 +5,13 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-record OfferResponseDto(
+public record OfferResponseDto(
 
-        Long id,
+        String id,
         String title,
         String description,
         String company,
+        String offerUrl,
         LocalDateTime publicationDate,
         boolean isActive
 

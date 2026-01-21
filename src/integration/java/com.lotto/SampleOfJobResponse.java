@@ -16,7 +16,7 @@ public interface SampleOfJobResponse {
                                     "salary": null,
                                     "offerUrl": "https://nofluffjobs.com/pl/job/junior-java-developer-netcompany-poland-warsaw-3"
                             }
-                        [
+                        ]
                         """.trim();
     }
 
@@ -36,7 +36,7 @@ public interface SampleOfJobResponse {
                                     "salary": null,
                                     "offerUrl": "https://nofluffjobs.com/pl/job/praktykant-java-developer-pentacomp-systemy-informatyczne-warszawa"
                             }
-                        [
+                        ]
                         """.trim();
     }
 
@@ -68,7 +68,7 @@ public interface SampleOfJobResponse {
                                     "salary": null,
                                     "offerUrl": "https://nofluffjobs.com/pl/job/software-developer-brainworkz-warsaw"
                             }
-                        [
+                        ]
                         """.trim();
     }
 

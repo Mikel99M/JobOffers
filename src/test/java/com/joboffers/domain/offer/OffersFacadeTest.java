@@ -8,6 +8,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class OffersFacadeTest {
 
@@ -15,20 +16,21 @@ class OffersFacadeTest {
     private OfferMapperStub mapper;
     private OfferFetcherStub fetcher;
     private OffersFacade facade;
+    private OfferService offerService;
 
     @BeforeEach
     void setup() {
         offerRepo = new OfferRepositoryStub();
         mapper = new OfferMapperStub();
         fetcher = new OfferFetcherStub();
-        facade = new OffersFacade(offerRepo, mapper, fetcher);
+        facade = new OffersFacade(offerRepo, mapper, fetcher, offerService);
     }
 
     @Test
     void shouldAddOffer() {
         // given
         OfferRequestDto dto = new OfferRequestDto(
-                "Java Developer", "Backend", "Google"
+                "Java Developer", "Backend", "url", "Google"
         );
 
         // when
@@ -36,8 +38,12 @@ class OffersFacadeTest {
 
         // then
         Offer saved = offerRepo.findById(response.id()).orElseThrow();
-        assertThat(saved.getTitle()).isEqualTo("Java Developer");
-        assertThat(saved.getCompany()).isEqualTo("Google");
+        assertAll(
+                () -> assertThat(saved.getTitle()).isEqualTo("Java Developer"),
+                () -> assertThat(saved.getOfferUrl()).isEqualTo("url"),
+                () -> assertThat(saved.getCompany()).isEqualTo("Google")
+        );
+
     }
 
     @Test
@@ -60,8 +66,8 @@ class OffersFacadeTest {
 
     @Test
     void shouldThrowWhenOfferNotFoundById() {
-        assertThatThrownBy(() -> facade.fetchOfferById(999L))
-                .isInstanceOf(NoOfferFoundException.class)
+        assertThatThrownBy(() -> facade.fetchOfferById("999"))
+                .isInstanceOf(OfferNotFoundException.class)
                 .hasMessageContaining("999");
     }
 
@@ -112,8 +118,8 @@ class OffersFacadeTest {
 
     @Test
     void shouldThrowWhenTogglingOnMissingOffer() {
-        assertThatThrownBy(() -> facade.activateOrDeactivateOffer(123L))
-                .isInstanceOf(NoOfferFoundException.class)
+        assertThatThrownBy(() -> facade.activateOrDeactivateOffer("123"))
+                .isInstanceOf(OfferNotFoundException.class)
                 .hasMessageContaining("123");
     }
 

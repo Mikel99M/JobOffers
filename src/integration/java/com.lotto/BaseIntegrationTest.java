@@ -17,7 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
-@SpringBootTest(classes = JobOffersApplication.class)
+@SpringBootTest(classes = JobOffersApplication.class, properties = "spring.task.scheduling.enabled=false")
 @ActiveProfiles("integration")
 @AutoConfigureMockMvc
 @Testcontainers
@@ -29,7 +29,7 @@ public class BaseIntegrationTest {
     public MockMvc mockMvc;
 
     @Container
-    public static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:4.0.10"));
+    public static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:4.4.2"));
 
     @Autowired
     public ObjectMapper objectMapper;

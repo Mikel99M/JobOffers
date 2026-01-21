@@ -2,7 +2,7 @@ package com.joboffers.domain.offer;
 
 import java.util.List;
 
-class OfferFetcher implements OfferFetchable {
+public class OfferFetcher implements OfferFetchable {
 
     @Override
     public List<JobOfferResponse> fetchOffers() {

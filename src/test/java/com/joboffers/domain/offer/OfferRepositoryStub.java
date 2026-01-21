@@ -15,21 +15,31 @@ import java.util.function.Function;
 
 class OfferRepositoryStub implements OfferRepository {
 
-    private final Map<Long, Offer> db = new HashMap<>();
+    private final Map<String, Offer> db = new HashMap<>();
     private long idSeq = 1L;
 
     @Override
     public Offer save(Offer offer) {
         if (offer.getId() == null) {
-            offer.setId(idSeq++);
+            offer.setId(String.valueOf(idSeq++)); // generate string ID
         }
         db.put(offer.getId(), offer);
         return offer;
     }
 
     @Override
-    public Optional<Offer> findById(Long id) {
+    public Optional<Offer> findById(String id) {
         return Optional.ofNullable(db.get(id));
+    }
+
+    @Override
+    public boolean existsById(final String s) {
+        return false;
+    }
+
+    @Override
+    public <S extends Offer> List<S> saveAll(final Iterable<S> entities) {
+        return List.of();
     }
 
     @Override
@@ -38,13 +48,43 @@ class OfferRepositoryStub implements OfferRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public List<Offer> findAllById(final Iterable<String> strings) {
+        return List.of();
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public void deleteById(String id) {
         db.remove(id);
     }
 
     @Override
-    public <S extends Offer> Optional<S> findOne(final Example<S> example) {
-        return Optional.empty();
+    public void delete(final Offer entity) {
+
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends String> strings) {
+
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends Offer> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
+
+    @Override
+    public boolean existsByOfferUrl(String offerUrl) {
+        return db.values().stream().anyMatch(o -> o.getOfferUrl().equals(offerUrl));
     }
 
     @Override
@@ -55,6 +95,11 @@ class OfferRepositoryStub implements OfferRepository {
     @Override
     public <S extends Offer> List<S> insert(final Iterable<S> entities) {
         return List.of();
+    }
+
+    @Override
+    public <S extends Offer> Optional<S> findOne(final Example<S> example) {
+        return Optional.empty();
     }
 
     @Override
@@ -85,46 +130,6 @@ class OfferRepositoryStub implements OfferRepository {
     @Override
     public <S extends Offer, R> R findBy(final Example<S> example, final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
-    }
-
-    @Override
-    public <S extends Offer> List<S> saveAll(final Iterable<S> entities) {
-        return List.of();
-    }
-
-    @Override
-    public boolean existsById(final Long aLong) {
-        return false;
-    }
-
-    @Override
-    public List<Offer> findAllById(final Iterable<Long> longs) {
-        return List.of();
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
-    public void delete(final Offer entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(final Iterable<? extends Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAll(final Iterable<? extends Offer> entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
     }
 
     @Override
