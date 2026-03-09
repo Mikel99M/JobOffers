@@ -3,7 +3,7 @@ package com.joboffers.domain.offer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +54,7 @@ class OffersFacadeTest {
         offer.setDescription("Cloud");
         offer.setCompany("AWS");
         offer.setActive(true);
-        offer.setPublicationDate(LocalDateTime.now());
+        offer.setPublicationDate(Instant.now());
         Offer saved = offerRepo.save(offer);
 
         // when
@@ -77,13 +77,13 @@ class OffersFacadeTest {
         Offer o1 = new Offer();
         o1.setTitle("Java");
         o1.setActive(true);
-        o1.setPublicationDate(LocalDateTime.now());
+        o1.setPublicationDate(Instant.now());
         offerRepo.save(o1);
 
         Offer o2 = new Offer();
         o2.setTitle("Python");
         o2.setActive(true);
-        o2.setPublicationDate(LocalDateTime.now());
+        o2.setPublicationDate(Instant.now());
         offerRepo.save(o2);
 
         // when
@@ -100,7 +100,7 @@ class OffersFacadeTest {
         Offer offer = new Offer();
         offer.setTitle("QA");
         offer.setActive(true);
-        offer.setPublicationDate(LocalDateTime.now());
+        offer.setPublicationDate(Instant.now());
         Offer saved = offerRepo.save(offer);
 
         // when
@@ -129,7 +129,7 @@ class OffersFacadeTest {
         Offer offer = new Offer();
         offer.setTitle("Go");
         offer.setActive(true);
-        offer.setPublicationDate(LocalDateTime.now());
+        offer.setPublicationDate(Instant.now());
         Offer saved = offerRepo.save(offer);
 
         // when

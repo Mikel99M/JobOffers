@@ -1,6 +1,6 @@
 package com.joboffers.domain.offer;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 class OfferMapperStub implements OfferMapperInterface {
 
@@ -12,7 +12,7 @@ class OfferMapperStub implements OfferMapperInterface {
         offer.setOfferUrl(dto.offerUrl());
         offer.setCompany(dto.company());
         offer.setActive(true);
-        offer.setPublicationDate(LocalDateTime.now());
+        offer.setPublicationDate(Instant.now());
         return offer;
     }
 

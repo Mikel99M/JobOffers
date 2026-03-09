@@ -2,7 +2,7 @@ package com.joboffers.domain.offer;
 
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Builder
 public record OfferResponseDto(
@@ -12,7 +12,7 @@ public record OfferResponseDto(
         String description,
         String company,
         String offerUrl,
-        LocalDateTime publicationDate,
+        Instant publicationDate,
         boolean isActive
 
 ) {

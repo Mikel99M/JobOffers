@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,7 +29,7 @@ public class Offer {
     @Field("company")
     private String company;
     @Field("Date of publication")
-    private LocalDateTime publicationDate;
+    private Instant publicationDate;
     @Field("url")
     @Indexed(unique = true)
     private String offerUrl;
