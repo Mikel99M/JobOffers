@@ -38,6 +38,7 @@
         <testcontainers.version>1.17.4</testcontainers.version>
         <wiremock-jre8.version>2.35.0</wiremock-jre8.version>
         <awaitility.version>4.3.0</awaitility.version>
+        <java-jwt.version>4.0.0</java-jwt.version>
     </properties>
 
     <dependencies>
@@ -75,6 +76,11 @@
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!--          TEST CONTAINERS -->
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -106,12 +112,6 @@
             <version>${lombok.version}</version>
             <scope>compile</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.mockito</groupId>-->
-<!--            <artifactId>mockito-core</artifactId>-->
-<!--            <version>${mockito-core.version}</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
 
         <!--  WIREMOCK -->
         <dependency>
@@ -134,6 +134,21 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
         </dependency>
+
+        <!--        JWT-->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt.version}</version>
+        </dependency>
+
+        <!--        CONFIGURATION_PROPERTIES-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
 
     </dependencies>
 

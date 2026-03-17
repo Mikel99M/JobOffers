@@ -13,7 +13,12 @@ offers:
       config:
         uri: http://ec2-3-127-218-34.eu-central-1.compute.amazonaws.com
         port: 5057
-        readTimeout: 1000
   scheduler:
     request:
       delay: "*/10 * * * * *"
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-days: 30
+    issuer: Job Offers Service
