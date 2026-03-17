@@ -3,9 +3,10 @@ package com.joboffers.domain.loginandregister;
 import lombok.Builder;
 
 @Builder
-record UserDto(
+public record UserDto(
         String name,
-        String email
+        String email,
+        String password
 
 ) {
 }

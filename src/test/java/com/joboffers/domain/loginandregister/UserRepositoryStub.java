@@ -15,11 +15,10 @@ import java.util.function.Function;
 class UserRepositoryStub implements UserRepository {
 
     private final Map<String, User> database = new HashMap<>();
-    private long idSequence = 1L;
 
     @Override
-    public boolean existsByEmail(String email) {
-        return database.containsKey(email);
+    public boolean existsByUserName(String userName) {
+        return database.containsKey(userName);
     }
 
     @Override
@@ -28,10 +27,12 @@ class UserRepositoryStub implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByUserName(final String username) {
+        return Optional.empty();
+    }
+
+    @Override
     public User save(User user) {
-        if (user.getId() == null) {
-            user.setId(idSequence++);
-        }
         database.put(user.getEmail(), user);
         return user;
     }
@@ -42,7 +43,7 @@ class UserRepositoryStub implements UserRepository {
     }
 
     @Override
-    public void deleteAllById(final Iterable<? extends Long> longs) {
+    public void deleteAllById(final Iterable<? extends String> strings) {
 
     }
 
@@ -107,12 +108,12 @@ class UserRepositoryStub implements UserRepository {
     }
 
     @Override
-    public Optional<User> findById(final Long aLong) {
+    public Optional<User> findById(final String s) {
         return Optional.empty();
     }
 
     @Override
-    public boolean existsById(final Long aLong) {
+    public boolean existsById(final String s) {
         return false;
     }
 
@@ -122,8 +123,8 @@ class UserRepositoryStub implements UserRepository {
     }
 
     @Override
-    public List<User> findAllById(final Iterable<Long> longs) {
-        return List.of();
+    public Iterable<User> findAllById(final Iterable<String> strings) {
+        return null;
     }
 
     @Override
@@ -132,7 +133,7 @@ class UserRepositoryStub implements UserRepository {
     }
 
     @Override
-    public void deleteById(final Long aLong) {
+    public void deleteById(final String s) {
 
     }
 

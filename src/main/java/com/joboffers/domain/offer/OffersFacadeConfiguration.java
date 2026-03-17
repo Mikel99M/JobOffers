@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class OffersFacadeConfiguration {
+public class OffersFacadeConfiguration {
 
     @Bean
     OfferMapperInterface offerMapper() {
@@ -12,8 +12,7 @@ class OffersFacadeConfiguration {
     }
 
     @Bean
-    OfferService offerService(OfferFetchable offerFetcher, OfferRepository offerRepository) {
-        OfferMapperInterface offerMapper = new OfferMapper();
+    OfferService offerService(OfferFetchable offerFetcher, OfferRepository offerRepository, OfferMapperInterface offerMapper) {
 
         return new OfferService(offerFetcher, offerMapper, offerRepository);
     }

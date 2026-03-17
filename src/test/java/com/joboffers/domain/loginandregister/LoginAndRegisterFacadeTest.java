@@ -2,11 +2,12 @@ package com.joboffers.domain.loginandregister;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class LoginAndRegsiterFacadeTest {
+public class LoginAndRegisterFacadeTest {
 
     private UserRepositoryStub stubRepo;
     private LoginAndRegisterFacade facade;
@@ -18,37 +19,37 @@ class LoginAndRegsiterFacadeTest {
     }
 
     @Test
-    void should_Register_User_When_Email_Does_Not_Exist() {
+    void should_Register_User_When_User_Does_Not_Exist() {
         // given
-        RegisterRequestDto requestDto = new RegisterRequestDto("John", "pass", "john@example.com");
+        RegisterRequestDto requestDto = new RegisterRequestDto("John", "pass");
 
         // when
         facade.register(requestDto);
 
         // then
         User user = stubRepo.findByEmail("john@example.com").orElseThrow();
-        assertThat("John").isEqualTo(user.getName());
+        assertThat("John").isEqualTo(user.getUsername());
         assertThat("pass").isEqualTo(user.getPassword());
     }
 
     @Test
-    void shouldNotRegisterWhenEmailExists() {
+    void should_Not_Register_When_User_Exists() {
         // given
         User existing = User.builder()
                 .email("john@example.com")
-                .name("Old John")
+                .userName("Old John")
                 .password("old")
                 .build();
 
         stubRepo.save(existing);
-        RegisterRequestDto req = new RegisterRequestDto("John", "pass", "john@example.com");
+        RegisterRequestDto req = new RegisterRequestDto("John", "pass");
 
         // when
         facade.register(req);
 
         // then
         User user = stubRepo.findByEmail("john@example.com").orElseThrow();
-        assertThat("Old John").isEqualTo(user.getName());   // not overwritten
+        assertThat("Old John").isEqualTo(user.getUsername());   // not overwritten
         assertThat("old").isEqualTo(user.getPassword());
     }
 
@@ -58,7 +59,7 @@ class LoginAndRegsiterFacadeTest {
         User user = User.builder()
                 .email("john@example.com")
                 .password("pass")
-                .name("John")
+                .userName("John")
                 .build();
         stubRepo.save(user);
 
@@ -68,7 +69,7 @@ class LoginAndRegsiterFacadeTest {
         facade.deleteUser(req);
 
         // then
-        assertThat(stubRepo.existsByEmail("john@example.com"));
+        assertThat(stubRepo.existsByUserName("john@example.com"));
     }
 
     @Test
@@ -77,7 +78,7 @@ class LoginAndRegsiterFacadeTest {
         User user = User.builder()
                 .email("john@example.com")
                 .password("pass")
-                .name("John")
+                .userName("John")
                 .build();
         stubRepo.save(user);
 
@@ -87,15 +88,14 @@ class LoginAndRegsiterFacadeTest {
         facade.deleteUser(req);
 
         // then
-        assertThat(stubRepo.existsByEmail("john@example.com"));
+        assertThat(stubRepo.existsByUserName("john@example.com"));
     }
 
     @Test
     void shouldThrowWhenDeletingNonExistingUser() {
-        DeleteRequestDto req = new DeleteRequestDto("pass", "John@example.com");
-
+        // when & then
         assertThatThrownBy(() -> facade.findByEmail("john@example.com"))
-                .isInstanceOf(UserNotFoundException.class);
+                .isInstanceOf(BadCredentialsException.class);
     }
 
     @Test
@@ -103,7 +103,7 @@ class LoginAndRegsiterFacadeTest {
         // given
         User user = User.builder()
                 .email("john@example.com")
-                .name("John")
+                .userName("John")
                 .password("pass")
                 .build();
         stubRepo.save(user);
@@ -118,6 +118,7 @@ class LoginAndRegsiterFacadeTest {
 
     @Test
     void shouldThrowWhenUserNotFoundByEmail() {
+        // when & then
         assertThatThrownBy(() -> facade.findByEmail("john@example.com"))
-                .isInstanceOf(UserNotFoundException.class);    }
+                .isInstanceOf(BadCredentialsException.class);    }
 }

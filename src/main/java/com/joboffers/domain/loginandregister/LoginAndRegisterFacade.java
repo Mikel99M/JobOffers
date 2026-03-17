@@ -1,22 +1,29 @@
 package com.joboffers.domain.loginandregister;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.stereotype.Component;
 
+@Component
 @AllArgsConstructor
 public class LoginAndRegisterFacade {
 
     private final UserRepository userRepository;
 
-    public void register(RegisterRequestDto requestDto) {
+    public RegistrationResultDto register(RegisterRequestDto requestDto) {
 
-        if (!userRepository.existsByEmail(requestDto.email())) {
+        if (!userRepository.existsByUserName(requestDto.username())) {
             User user = User.builder()
-                    .email(requestDto.email())
+                    .email(requestDto.username())
                     .password(requestDto.password())
-                    .name(requestDto.name())
+                    .userName(requestDto.username())
                     .build();
-            userRepository.save(user);
+            User savedUser = userRepository.save(user);
+
+            return new RegistrationResultDto(savedUser.id(), true, savedUser.userName());
         }
+
+        throw new UserAlreadyExistsException("Username is already in use");
     }
 
     public void deleteUser(DeleteRequestDto requestDto) {
@@ -26,11 +33,20 @@ public class LoginAndRegisterFacade {
         }
     }
 
-    public UserDto findByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User with email \"%s\" not found.".formatted(email)));
+    public UserDto findByUserName(String userName) {
+        User user = userRepository.findByUserName(userName).orElseThrow(() -> new BadCredentialsException("User with user username \"%s\" not found.".formatted(userName)));
         return UserDto.builder()
                 .email(user.getEmail())
-                .name(user.getName())
+                .name(user.getUsername())
+                .password(user.getPassword())
+                .build();
+    }
+
+    public UserDto findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new BadCredentialsException("User with email \"%s\" not found.".formatted(email)));
+        return UserDto.builder()
+                .email(user.getEmail())
+                .name(user.getUsername())
                 .build();
     }
 

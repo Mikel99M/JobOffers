@@ -1,5 +1,6 @@
 package com.joboffers.domain;
 
+import com.joboffers.domain.loginandregister.UserAlreadyExistsException;
 import com.joboffers.domain.loginandregister.UserNotFoundException;
 import com.joboffers.domain.offer.OfferNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
@@ -31,9 +32,16 @@ public class GlobalErrorHandler {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DuplicateKeyException.class)
-    public ResponseEntity<ErrorMessageResponse> handleDuplicateKeyException(DuplicateKeyException exception) {
+    public ResponseEntity<ErrorMessageResponse> handleDuplicateKeyException(DuplicateKeyException e) {
         String message = "Offer with this URL already exists";
         ErrorMessageResponse error = new ErrorMessageResponse(message, HttpStatus.CONFLICT);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorMessageResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        ErrorMessageResponse error = new ErrorMessageResponse(e.getMessage(), HttpStatus.CONFLICT);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
