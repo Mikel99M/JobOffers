@@ -27,13 +27,13 @@ public class LoginAndRegisterFacadeTest {
         facade.register(requestDto);
 
         // then
-        User user = stubRepo.findByEmail("john@example.com").orElseThrow();
-        assertThat("John").isEqualTo(user.getUsername());
-        assertThat("pass").isEqualTo(user.getPassword());
+        User user = stubRepo.findByUserName("John").orElseThrow(() -> new UserNotFoundException("User not found"));
+        assertThat(user.getUsername()).isEqualTo("John");
+        assertThat(user.getPassword()).isEqualTo("pass");
     }
 
     @Test
-    void should_Not_Register_When_User_Exists() {
+    void should_Not_Register_When_User_Exists_and_throw_UserAlreadyExistsException() {
         // given
         User existing = User.builder()
                 .email("john@example.com")
@@ -49,12 +49,13 @@ public class LoginAndRegisterFacadeTest {
 
         // then
         User user = stubRepo.findByEmail("john@example.com").orElseThrow();
-        assertThat("Old John").isEqualTo(user.getUsername());   // not overwritten
+        assertThat("Old John").isEqualTo(user.getUsername());
         assertThat("old").isEqualTo(user.getPassword());
+        assertThatThrownBy(() -> facade.register(req)).isInstanceOf(UserAlreadyExistsException.class);
     }
 
     @Test
-    void shouldDeleteUserWhenPasswordMatches() {
+    void should_Delete_User_When_Password_Matches() {
         // given
         User user = User.builder()
                 .email("john@example.com")
@@ -69,11 +70,11 @@ public class LoginAndRegisterFacadeTest {
         facade.deleteUser(req);
 
         // then
-        assertThat(stubRepo.existsByUserName("john@example.com"));
+        assertThat(stubRepo.existsByUserName("John")).isFalse();
     }
 
     @Test
-    void shouldNotDeleteWhenPasswordDoesNotMatch() {
+    void should_Not_Delete_When_Password_Does_Not_Match() {
         // given
         User user = User.builder()
                 .email("john@example.com")
@@ -82,24 +83,25 @@ public class LoginAndRegisterFacadeTest {
                 .build();
         stubRepo.save(user);
 
-        DeleteRequestDto req = new DeleteRequestDto( "pass", "john@example.com");
+        DeleteRequestDto req = new DeleteRequestDto( "false password", "john@example.com");
 
         // when
         facade.deleteUser(req);
 
         // then
-        assertThat(stubRepo.existsByUserName("john@example.com"));
+        assertThat(stubRepo.existsByUserName("John")).isTrue();
+
     }
 
     @Test
-    void shouldThrowWhenDeletingNonExistingUser() {
+    void should_Throw_When_Deleting_Non_Existing_User() {
         // when & then
         assertThatThrownBy(() -> facade.findByEmail("john@example.com"))
                 .isInstanceOf(BadCredentialsException.class);
     }
 
     @Test
-    void shouldFindUserByEmail() {
+    void should_Find_User_By_Email() {
         // given
         User user = User.builder()
                 .email("john@example.com")
@@ -117,8 +119,33 @@ public class LoginAndRegisterFacadeTest {
     }
 
     @Test
-    void shouldThrowWhenUserNotFoundByEmail() {
+    void should_Find_User_By_UserName() {
+        // given
+        User user = User.builder()
+                .email("john@example.com")
+                .userName("John")
+                .password("pass")
+                .build();
+        stubRepo.save(user);
+
+        // when
+        UserDto dto = facade.findByUserName("John");
+
+        // then
+        assertThat(dto.name()).isEqualTo("John");
+        assertThat(dto.email()).isEqualTo("john@example.com");
+    }
+
+    @Test
+    void should_Throw_When_User_Not_Found_By_Email() {
         // when & then
         assertThatThrownBy(() -> facade.findByEmail("john@example.com"))
+                .isInstanceOf(BadCredentialsException.class);    }
+
+
+    @Test
+    void should_Throw_When_User_Not_Found_By_UserName() {
+        // when & then
+        assertThatThrownBy(() -> facade.findByUserName("asdsadasd"))
                 .isInstanceOf(BadCredentialsException.class);    }
 }
