@@ -21,7 +21,7 @@ class OfferRepositoryStub implements OfferRepository {
     @Override
     public Offer save(Offer offer) {
         if (offer.getId() == null) {
-            offer.setId(String.valueOf(idSeq++)); // generate string ID
+            offer.setId(String.valueOf(idSeq++));
         }
         db.put(offer.getId(), offer);
         return offer;
@@ -39,7 +39,11 @@ class OfferRepositoryStub implements OfferRepository {
 
     @Override
     public <S extends Offer> List<S> saveAll(final Iterable<S> entities) {
-        return List.of();
+        List<S> result = new ArrayList<>();
+        for (S entity : entities) {
+            result.add((S) save(entity));
+        }
+        return result;
     }
 
     @Override
@@ -64,27 +68,24 @@ class OfferRepositoryStub implements OfferRepository {
 
     @Override
     public void delete(final Offer entity) {
-
     }
 
     @Override
     public void deleteAllById(final Iterable<? extends String> strings) {
-
     }
 
     @Override
     public void deleteAll(final Iterable<? extends Offer> entities) {
-
     }
 
     @Override
     public void deleteAll() {
-
     }
 
     @Override
     public boolean existsByOfferUrl(String offerUrl) {
-        return db.values().stream().anyMatch(o -> o.getOfferUrl().equals(offerUrl));
+        return db.values().stream()
+                .anyMatch(o -> o.getOfferUrl().equals(offerUrl));
     }
 
     @Override

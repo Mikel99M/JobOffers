@@ -10,7 +10,6 @@ public class OffersFacade {
 
     private final OfferRepository offerRepository;
     private final OfferMapperInterface offerMapper;
-    private final OfferFetchable offerFetcher;
     private final OfferService offerService;
 
     public OfferResponseDto addOffer(OfferRequestDto offerDto) {

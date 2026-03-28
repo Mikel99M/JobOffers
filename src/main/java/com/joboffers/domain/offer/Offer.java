@@ -28,6 +28,8 @@ public class Offer {
     private String description;
     @Field("company")
     private String company;
+    @Field
+    private String salary;
     @Field("Date of publication")
     private Instant publicationDate;
     @Field("url")

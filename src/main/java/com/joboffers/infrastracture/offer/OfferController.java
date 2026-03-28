@@ -23,7 +23,6 @@ public class OfferController {
 
     @GetMapping
     public ResponseEntity<List<OfferResponseDto>> getOffers() {
-
         List<OfferResponseDto> result = offersFacade.fetchAllOffersAndSaveIfNotExists();
         return ResponseEntity.ok().body(result);
     }

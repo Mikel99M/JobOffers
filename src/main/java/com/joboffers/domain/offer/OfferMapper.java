@@ -31,7 +31,7 @@ class OfferMapper implements OfferMapperInterface {
         return Offer.builder()
                 .company(response.company())
                 .offerUrl(response.offerUrl())
-                .title(response.title())
+                .salary(response.salary())
                 .title(response.title())
                 .build();
     }

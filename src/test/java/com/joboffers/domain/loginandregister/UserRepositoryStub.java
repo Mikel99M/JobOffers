@@ -18,7 +18,7 @@ class UserRepositoryStub implements UserRepository {
 
     @Override
     public boolean existsByUserName(String userName) {
-        return database.containsKey(userName);
+        return database.values().stream().anyMatch(user -> user.getUsername().equals(userName));
     }
 
     @Override
@@ -28,8 +28,9 @@ class UserRepositoryStub implements UserRepository {
 
     @Override
     public Optional<User> findByUserName(final String username) {
-        return Optional.empty();
-    }
+        return database.values().stream()
+                .filter(user -> user.getUsername().equals(username))
+                .findFirst();    }
 
     @Override
     public User save(User user) {
@@ -119,7 +120,7 @@ class UserRepositoryStub implements UserRepository {
 
     @Override
     public List<User> findAll() {
-        return List.of();
+        return List.of(database.values().toArray(new User[0]));
     }
 
     @Override

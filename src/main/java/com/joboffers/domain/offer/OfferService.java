@@ -16,6 +16,7 @@ class OfferService {
 
         List<Offer> uniqueOffers = fetchOffersFromClient().stream()
                 .filter(offer -> !offerRepository.existsByOfferUrl(offer.getOfferUrl()))
+                .peek(offer -> offer.setActive(true))
                 .toList();
 
         offerRepository.saveAll(uniqueOffers);

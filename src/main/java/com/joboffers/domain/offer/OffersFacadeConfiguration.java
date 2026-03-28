@@ -27,7 +27,6 @@ public class OffersFacadeConfiguration {
         return new OffersFacade(
                 offerRepository,
                 offerMapper,
-                offerFetcher,
                 offerService
         );
     }
