@@ -25,16 +25,16 @@ public interface SampleOfJobResponse {
                 """
                         [
                             {
-                                "title": "Junior Java Developer NOWA",
-                                    "company": "Netcompany Poland Sp. z o.o.",
+                                "title": "AI Engineer",
+                                    "company": "Strategy",
                                     "salary": null,
-                                    "offerUrl": "https://nofluffjobs.com/pl/job/junior-java-developer-netcompany-poland-warsaw-3"
+                                    "offerUrl": "https://nofluffjobs.com/pl/job/ai-engineer-strategy-warsaw"
                             },
                             {
-                                "title": "Praktykant Java Developer NOWA",
-                                    "company": "Pentacomp Systemy Informatyczne S.A.",
+                                "title": "Salesforce Developer - Force Academy",
+                                    "company": "Britenet",
                                     "salary": null,
-                                    "offerUrl": "https://nofluffjobs.com/pl/job/praktykant-java-developer-pentacomp-systemy-informatyczne-warszawa"
+                                    "offerUrl": "https://nofluffjobs.com/pl/job/salesforce-developer-force-academy-britenet-lublin-4"
                             }
                         ]
                         """.trim();
