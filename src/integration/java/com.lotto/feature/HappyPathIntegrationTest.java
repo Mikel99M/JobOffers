@@ -1,12 +1,8 @@
 package com.lotto.feature;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.joboffers.domain.ErrorMessageResponse;
-import com.joboffers.domain.loginandregister.RegistrationResultDto;
+import com.jayway.jsonpath.JsonPath;
 import com.joboffers.domain.offer.OfferResponseDto;
-import com.joboffers.infrastracture.loginandregister.dto.JwtResponseDto;
-import com.joboffers.infrastracture.offer.http.OfferFetcherRestTemplate;
 import com.joboffers.infrastracture.offer.scheduler.OffersScheduler;
 import com.lotto.BaseIntegrationTest;
 import com.lotto.SampleOfJobResponse;
@@ -21,19 +17,18 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class HappyPathIntegrationTest extends BaseIntegrationTest implements SampleOfJobResponse {
 
     @Autowired
     OffersScheduler scheduler;
-
-    @Autowired
-    OfferFetcherRestTemplate offerClient;
 
     @Test
     void test_typical_scenario() throws Exception {
@@ -83,27 +78,19 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
         failedGetOffersRequest.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
         //step 5: user made POST /register with username=someUser, password=somePassword and system registered user with status CREATED(201)
-        // given & when
-        ResultActions registerAction = mockMvc.perform(post("/register")
-                .content("""
-                        {
-                        "username": "someUser",
-                        "password": "somePassword"
-                        }
-                        """.trim())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-        );
-
-        // then
-        registerAction.andExpect(status().is(HttpStatus.CREATED.value()));
-        MvcResult mvcResultOfRegisterAction = registerAction.andReturn();
-        String registerActionResultJson = mvcResultOfRegisterAction.getResponse().getContentAsString();
-        RegistrationResultDto registrationResultDto = objectMapper.readValue(registerActionResultJson, RegistrationResultDto.class);
-        assertAll(
-                () -> assertThat(registrationResultDto.username()).isEqualTo("someUser"),
-                () -> assertThat(registrationResultDto.created()).isTrue(),
-                () -> assertThat(registrationResultDto.id()).isNotNull()
-        );
+        // when & then
+        mockMvc.perform(post("/register")
+                        .content("""
+                                {
+                                "username": "someUser",
+                                "password": "somePassword"
+                                }
+                                """.trim())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("someUser"))
+                .andExpect(jsonPath("$.created").value(true))
+                .andExpect(jsonPath("$.id").exists());
 
         //step 6: user tried to get JWT token by requesting POST /token with username=someUser, password=somePassword and system returned OK(200) and jwttoken=AAAA.BBBB.CCC
         // given & when
@@ -117,30 +104,25 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
                         """.trim())
         );
 
-        // then
-        MvcResult mvcResultOfLoginRequest = successLoginRequest.andReturn();
-        String loginRequestResultJson = mvcResultOfLoginRequest.getResponse().getContentAsString();
-        JwtResponseDto jwtResponse = objectMapper.readValue(loginRequestResultJson, JwtResponseDto.class);
-        String token = jwtResponse.token();
+        String loginResponseJson = successLoginRequest
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("someUser"))
+                .andExpect(jsonPath("$.token").exists())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        assertAll(
-                () -> assertThat(jwtResponse.username()).isEqualTo("someUser"),
-                () -> assertThat(token).matches(Pattern.compile("^([A-Za-z0-9-_=]+\\.)+([A-Za-z0-9-_=])+\\.?$"))
-        );
+        String token = JsonPath.read(loginResponseJson, "$.token");
+
+        assertThat(token).matches(Pattern.compile("^([A-Za-z0-9-_=]+\\.)+([A-Za-z0-9-_=])+\\.?$"));
 
         //step 7: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 0 offers
-        // when
-        ResultActions perform = mockMvc.perform(get("/offers")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        MvcResult mvcResult = perform.andExpect(status().isOk()).andReturn();
-        String json = mvcResult.getResponse().getContentAsString();
-        List<OfferResponseDto> result = objectMapper.readValue(json, new TypeReference<List<OfferResponseDto>>() {
-        });
-        assertThat(result).isEmpty();
+        // when & then
+        mockMvc.perform(get("/offers")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
 
         //step 8: there are 4 new offers in external HTTP server
         wireMockServer.stubFor(WireMock.get("/offers")
@@ -158,65 +140,41 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
         assertThat(newOffers).hasSize(4);
 
         //step 10: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 4 offers
-        // given
+        // when & then
         ResultActions getOffersAction = mockMvc.perform(get("/offers")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-        );
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(4))
+                .andExpect(jsonPath("$[0].title").value("Junior Java Developer NOWA"))
+                .andExpect(jsonPath("$[0].company").value("Netcompany Poland Sp. z o.o."))
+                .andExpect(jsonPath("$[0].offerUrl").value("https://nofluffjobs.com/pl/job/junior-java-developer-netcompany-poland-warsaw-3"))
+                .andExpect(jsonPath("$[3].offerUrl").value("https://nofluffjobs.com/pl/job/software-developer-brainworkz-warsaw"))
+                .andExpect(jsonPath("$[0].id").exists())
+                .andExpect(jsonPath("$[1].id").exists())
+                .andExpect(jsonPath("$[*].isActive").value(everyItem(is(true))));
 
-        MvcResult getOffersActionResult = getOffersAction.andExpect(status().is(HttpStatus.OK.value())).andReturn();
-        String getOffersActionResultJson = getOffersActionResult.getResponse().getContentAsString();
-        List<OfferResponseDto> getOffersResult = objectMapper.readValue(getOffersActionResultJson, new TypeReference<List<OfferResponseDto>>() {
-        });
+        MvcResult mvcResult = getOffersAction.andExpect(status().isOk()).andReturn();
+        String json = mvcResult.getResponse().getContentAsString();
 
-        // then
-        assertAll(
-                () -> assertThat(getOffersResult.size()).isEqualTo(4),
-                () -> assertThat(getOffersResult.get(0).title()).isEqualTo("Junior Java Developer NOWA"),
-                () -> assertThat(getOffersResult.get(0).company()).isEqualTo("Netcompany Poland Sp. z o.o."),
-                () -> assertThat(getOffersResult.get(0).offerUrl()).isEqualTo("https://nofluffjobs.com/pl/job/junior-java-developer-netcompany-poland-warsaw-3"),
-                () -> assertThat(getOffersResult.get(3).offerUrl()).isEqualTo("https://nofluffjobs.com/pl/job/software-developer-brainworkz-warsaw"),
-                () -> assertThat(getOffersResult.get(0).id()).isNotEqualTo(getOffersResult.get(1).id()),
-                () -> assertThat(getOffersResult.get(2).id()).isNotEqualTo(getOffersResult.get(3).id()),
-                () -> assertThat(getOffersResult.get(0).isActive()).isTrue(),
-                () -> assertThat(getOffersResult.get(1).isActive()).isTrue(),
-                () -> assertThat(getOffersResult.get(2).isActive()).isTrue(),
-                () -> assertThat(getOffersResult.get(3).isActive()).isTrue()
-        );
-
-        String firstOfferId = getOffersResult.get(0).id();
+        String firstOfferId = JsonPath.read(json, "$[0].id");
 
         //step 11: user made GET /offers/9999 and system returned NOT_FOUND(404) with message “Offer with id 9999 not found”
-        // given & when
-        ResultActions perform1 = mockMvc.perform(get("/offers/9999")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
-
-        // then
-        MvcResult mvcResultOfFetchingNonExistantOffer = perform1.andReturn();
-        String json1 = mvcResultOfFetchingNonExistantOffer.getResponse().getContentAsString();
-        ErrorMessageResponse errorMessageResponseResult = objectMapper.readValue(json1, ErrorMessageResponse.class);
-
-        assertAll(
-                () -> assertThat(errorMessageResponseResult.message()).isEqualTo("No offer found with id: 9999"),
-                () -> assertThat(errorMessageResponseResult.status()).isEqualTo(HttpStatus.NOT_FOUND)
-        );
+        // when & then
+        mockMvc.perform(get("/offers/9999")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("No offer found with id: 9999"))
+                .andExpect(jsonPath("$.status").value("NOT_FOUND"));
 
         //step 12: user made GET /offers/{first offer id} and system returned OK(200) with offer
-        // give & when
-        ResultActions performGetOffersForFirstOffer = mockMvc.perform(get("/offers/%s".formatted(firstOfferId))
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
-        // then
-        MvcResult mvcResultOfPerformGetOffersForFirstOffer = performGetOffersForFirstOffer.andReturn();
-        String json2 = mvcResultOfPerformGetOffersForFirstOffer.getResponse().getContentAsString();
-        OfferResponseDto offerResponseDto1 = objectMapper.readValue(json2, OfferResponseDto.class);
-
-        assertAll(
-                () -> assertThat(offerResponseDto1.id()).isEqualTo(firstOfferId),
-                () -> assertThat(offerResponseDto1.title()).isEqualTo("Junior Java Developer NOWA")
-        );
+        // when & then
+        mockMvc.perform(get("/offers/%s".formatted(firstOfferId))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(firstOfferId))
+                .andExpect(jsonPath("$.title").value("Junior Java Developer NOWA"));
 
         //step 13: there are 2 new offers in external HTTP server
         wireMockServer.stubFor(WireMock.get("/offers")
@@ -234,76 +192,48 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
         assertThat(twoNewOffers).hasSize(6);
 
         //step 15: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 6 offers
-        // given & when
-        ResultActions performGetOfferAfterAdditionOfTwoNewOffers = mockMvc.perform(get("/offers")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
-        // then
-        MvcResult mvcResultOfPerformGetOfferAfterAdditionOfTwoNewOffers = performGetOfferAfterAdditionOfTwoNewOffers.andReturn();
-        String json3 = mvcResultOfPerformGetOfferAfterAdditionOfTwoNewOffers.getResponse().getContentAsString();
-        List<OfferResponseDto> getOffersResult2 = objectMapper.readValue(json3, new TypeReference<List<OfferResponseDto>>() {
-        });
-
-        assertAll(
-                () -> assertThat(getOffersResult2.size()).isEqualTo(6),
-                () -> assertThat(getOffersResult2.get(0).title()).isEqualTo("Junior Java Developer NOWA"),
-                () -> assertThat(getOffersResult2.get(4).title()).isEqualTo("AI Engineer"),
-                () -> assertThat(getOffersResult2.get(5).title()).isEqualTo("Salesforce Developer - Force Academy"),
-                () -> assertThat(getOffersResult2.get(4).offerUrl()).isEqualTo("https://nofluffjobs.com/pl/job/ai-engineer-strategy-warsaw"),
-                () -> assertThat(getOffersResult2.get(3).id()).isNotEqualTo(getOffersResult2.get(1).id()),
-                () -> assertThat(getOffersResult2.get(4).id()).isNotEqualTo(getOffersResult2.get(5).id()),
-                () -> assertThat(getOffersResult2.get(4).isActive()).isTrue(),
-                () -> assertThat(getOffersResult2.get(5).isActive()).isTrue()
-        );
+        // when & then
+        mockMvc.perform(get("/offers")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(6))
+                .andExpect(jsonPath("$[0].title").value("Junior Java Developer NOWA"))
+                .andExpect(jsonPath("$[4].title").value("AI Engineer"))
+                .andExpect(jsonPath("$[5].title").value("Salesforce Developer - Force Academy"))
+                .andExpect(jsonPath("$[4].offerUrl").value("https://nofluffjobs.com/pl/job/ai-engineer-strategy-warsaw"))
+                .andExpect(jsonPath("$[4:6].isActive").value(everyItem(is(true))));
 
         //step 16: user made POST /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and offer as body and system returned CREATED(201) with saved offer
         // when
-        ResultActions performPostOffer = mockMvc.perform(post("/offers")
-                .header("Authorization", "Bearer " + token)
-                .content("""
-                        {
-                          "title": "title 1",
-                          "description": "description 1",
-                          "offerUrl": "offerUrl 1",
-                          "company": "company 1"
-                        }
-                        """.trim())
-                .contentType(MediaType.APPLICATION_JSON
-                ));
-
-        // then
-        MvcResult mvcResultOfPostOffer = performPostOffer.andExpect(status().isCreated()).andReturn();
-        String postOfferJson = mvcResultOfPostOffer.getResponse().getContentAsString();
-        OfferResponseDto offerResponseDto2 = objectMapper.readValue(postOfferJson, OfferResponseDto.class);
-        assertAll(
-                () -> assertThat(offerResponseDto2.title()).isEqualTo("title 1"),
-                () -> assertThat(offerResponseDto2.description()).isEqualTo("description 1"),
-                () -> assertThat(offerResponseDto2.company()).isEqualTo("company 1"),
-                () -> assertThat(offerResponseDto2.offerUrl()).isEqualTo("offerUrl 1")
-        );
+        mockMvc.perform(post("/offers")
+                        .header("Authorization", "Bearer " + token)
+                        .content("""
+                                {
+                                  "title": "title 1",
+                                  "description": "description 1",
+                                  "offerUrl": "offerUrl 1",
+                                  "company": "company 1"
+                                }
+                                """.trim())
+                        .contentType(MediaType.APPLICATION_JSON
+                        ))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("title 1"))
+                .andExpect(jsonPath("$.description").value("description 1"))
+                .andExpect(jsonPath("$.company").value("company 1"))
+                .andExpect(jsonPath("$.offerUrl").value("offerUrl 1"))
+                .andExpect(jsonPath("$.id").exists());
 
         //step 17: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 7 offers
-        // given & when
-        ResultActions performGetOfferAfterAddingOneOffer = mockMvc.perform(get("/offers")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-
-        // then
-        MvcResult mvcResultOfPerformGetOfferAfterAddingOneOffer = performGetOfferAfterAddingOneOffer.andReturn();
-        String json4 = mvcResultOfPerformGetOfferAfterAddingOneOffer.getResponse().getContentAsString();
-        List<OfferResponseDto> getOffersResult3 = objectMapper.readValue(json4, new TypeReference<List<OfferResponseDto>>() {
-        });
-
-        assertAll(
-                () -> assertThat(getOffersResult3.size()).isEqualTo(7),
-                () -> assertThat(getOffersResult3.get(6).title()).isEqualTo("title 1"),
-                () -> assertThat(getOffersResult3.get(6).company()).isEqualTo("company 1"),
-                () -> assertThat(getOffersResult3.get(6).description()).isEqualTo("description 1"),
-                () -> assertThat(getOffersResult3.get(4).offerUrl()).isEqualTo("https://nofluffjobs.com/pl/job/ai-engineer-strategy-warsaw"),
-                () -> assertThat(getOffersResult3.get(6).id()).isNotEqualTo(getOffersResult3.get(4).id()),
-                () -> assertThat(getOffersResult3.get(6).isActive()).isTrue()
-        );
-
+        // when & then
+        mockMvc.perform(get("/offers")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(7))
+                .andExpect(jsonPath("$[6].title").value("title 1"))
+                .andExpect(jsonPath("$[6].company").value("company 1"))
+                .andExpect(jsonPath("$[6].isActive").value(true));
     }
 }
