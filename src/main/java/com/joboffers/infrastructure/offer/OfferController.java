@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.offer;
+package com.joboffers.infrastructure.offer;
 
 import com.joboffers.domain.offer.OfferRequestDto;
 import com.joboffers.domain.offer.OfferResponseDto;

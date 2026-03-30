@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.loginandregister;
+package com.joboffers.infrastructure.loginandregister;
 
 import com.joboffers.domain.loginandregister.LoginAndRegisterFacade;
 import com.joboffers.domain.loginandregister.RegisterRequestDto;

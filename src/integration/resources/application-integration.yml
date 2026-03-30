@@ -1,9 +1,0 @@
-offers:
-  scheduler:
-    request:
-      delay: "*/1 * * * * *"
-
-spring:
-  task:
-    scheduling:
-      enabled: false

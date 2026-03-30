@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.offer.http;
+package com.joboffers.infrastructure.offer.http;
 
 import java.io.IOException;
 import org.springframework.http.HttpStatus;

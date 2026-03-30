@@ -1,6 +1,7 @@
 package com.joboffers;
 
-import com.joboffers.infrastracture.security.jwt.JwtConfigurationProperties;
+import com.joboffers.infrastructure.offer.http.HttpClientConfigProperties;
+import com.joboffers.infrastructure.security.jwt.JwtConfigurationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

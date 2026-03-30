@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.loginandregister.dto;
+package com.joboffers.infrastructure.loginandregister.dto;
 
 import lombok.Builder;
 

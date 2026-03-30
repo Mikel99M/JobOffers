@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.security.jwt;
+package com.joboffers.infrastructure.security.jwt;
 
 import com.joboffers.domain.loginandregister.LoginAndRegisterFacade;
 import lombok.AllArgsConstructor;

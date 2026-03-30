@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.clock;
+package com.joboffers.infrastructure.clock;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

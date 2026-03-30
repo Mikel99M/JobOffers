@@ -1,7 +1,7 @@
 package com.lotto.scheduler;
 
 import com.joboffers.JobOffersApplication;
-import com.joboffers.infrastracture.offer.http.OfferFetcherRestTemplate;
+import com.joboffers.infrastructure.offer.http.OfferFetcherRestTemplate;
 import com.lotto.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +13,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-@SpringBootTest(classes = JobOffersApplication.class, properties = "spring.task.scheduling.enabled=true")
+@SpringBootTest(classes = JobOffersApplication.class, properties = {
+        "spring.task.scheduling.enabled=true",
+        "offers.scheduler.request.delay=*/1 * * * * *"})
 public class HttpOfferSchedulerTest extends BaseIntegrationTest {
 
     @SpyBean

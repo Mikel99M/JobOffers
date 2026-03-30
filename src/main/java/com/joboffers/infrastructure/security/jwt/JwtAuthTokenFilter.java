@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.security.jwt;
+package com.joboffers.infrastructure.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;

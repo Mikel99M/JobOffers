@@ -1,8 +1,8 @@
-package com.joboffers.infrastracture.loginandregister;
+package com.joboffers.infrastructure.loginandregister;
 
-import com.joboffers.infrastracture.loginandregister.dto.JwtResponseDto;
-import com.joboffers.infrastracture.loginandregister.dto.TokenRequestDto;
-import com.joboffers.infrastracture.security.jwt.JwtAuthenticatorFacade;
+import com.joboffers.infrastructure.loginandregister.dto.JwtResponseDto;
+import com.joboffers.infrastructure.loginandregister.dto.TokenRequestDto;
+import com.joboffers.infrastructure.security.jwt.JwtAuthenticatorFacade;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

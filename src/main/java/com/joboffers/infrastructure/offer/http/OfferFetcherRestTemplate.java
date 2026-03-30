@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.offer.http;
+package com.joboffers.infrastructure.offer.http;
 
 
 import com.joboffers.domain.offer.JobOfferResponse;
@@ -46,7 +46,7 @@ public class OfferFetcherRestTemplate implements OfferFetchable {
 
             ResponseEntity<List<JobOfferResponse>> response = restTemplate.exchange(
                     url, HttpMethod.GET, requestEntity,
-                    new ParameterizedTypeReference<List<JobOfferResponse>>() {
+                    new ParameterizedTypeReference<>() {
                     });
 
             List<JobOfferResponse> offers = response.getBody();

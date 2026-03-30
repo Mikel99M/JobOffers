@@ -1,4 +1,4 @@
-package com.joboffers.infrastracture.loginandregister.error;
+package com.joboffers.infrastructure.loginandregister.error;
 
 import org.springframework.http.HttpStatus;
 

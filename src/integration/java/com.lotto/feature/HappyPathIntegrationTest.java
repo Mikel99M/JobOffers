@@ -3,7 +3,7 @@ package com.lotto.feature;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.jayway.jsonpath.JsonPath;
 import com.joboffers.domain.offer.OfferResponseDto;
-import com.joboffers.infrastracture.offer.scheduler.OffersScheduler;
+import com.joboffers.infrastructure.offer.scheduler.OffersScheduler;
 import com.lotto.BaseIntegrationTest;
 import com.lotto.SampleOfJobResponse;
 import org.junit.jupiter.api.Test;
