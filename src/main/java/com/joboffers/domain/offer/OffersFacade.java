@@ -1,6 +1,7 @@
 package com.joboffers.domain.offer;
 
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ public class OffersFacade {
         offerRepository.deleteById(id);
     }
 
+    @Cacheable("jobOffers")
     public List<OfferResponseDto> fetchAllOffersAndSaveIfNotExists() {
         return offerService.fetchAllOffersAndSaveIfNotExists().stream()
                 .map(offerMapper::mapOfferToOfferResponseDto)

@@ -2,6 +2,7 @@ package com.joboffers.domain.offer;
 
 import lombok.Builder;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 @Builder
@@ -15,5 +16,5 @@ public record OfferResponseDto(
         Instant publicationDate,
         boolean isActive
 
-) {
+) implements Serializable {
 }

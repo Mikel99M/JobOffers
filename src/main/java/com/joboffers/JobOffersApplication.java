@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
-@EnableConfigurationProperties(value = {JwtConfigurationProperties.class})
+@EnableConfigurationProperties({JwtConfigurationProperties.class, HttpClientConfigProperties.class})
 public class JobOffersApplication {
 
     public static void main(String[] args) {

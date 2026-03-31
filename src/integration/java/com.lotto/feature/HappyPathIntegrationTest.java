@@ -1,13 +1,14 @@
 package com.lotto.feature;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.jayway.jsonpath.JsonPath;
+import com.joboffers.JobOffersApplication;
 import com.joboffers.domain.offer.OfferResponseDto;
 import com.joboffers.infrastructure.offer.scheduler.OffersScheduler;
 import com.lotto.BaseIntegrationTest;
 import com.lotto.SampleOfJobResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SpringBootTest(classes = JobOffersApplication.class, properties = {"spring.cache.type=none"})
 public class HappyPathIntegrationTest extends BaseIntegrationTest implements SampleOfJobResponse {
 
     @Autowired
@@ -33,19 +35,14 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
     @Test
     void test_typical_scenario() throws Exception {
         // step 1: there are no offers in external HTTP server
-        wireMockServer.stubFor(WireMock.get("/offers")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBody(bodyWithZeroOffersJson())
-                ));
+        createStubMockServer(bodyWithZeroOffersJson());
 
         // step 2: scheduler ran 1st time and made GET to external server and system added 0 offers to database
         // given & when
-        List<OfferResponseDto> zeroOffers = scheduler.fetchAllOffers();
+        List<OfferResponseDto> allOffers = scheduler.fetchAllOffers();
 
         //then
-        assertThat(zeroOffers).isEmpty();
+        assertThat(allOffers).isEmpty();
 
         //step 3: user tried to get JWT token by requesting POST /token with username=someUser, password=somePassword and system returned UNAUTHORIZED(401)
         // given & when
@@ -78,42 +75,11 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
         failedGetOffersRequest.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
         //step 5: user made POST /register with username=someUser, password=somePassword and system registered user with status CREATED(201)
-        // when & then
-        mockMvc.perform(post("/register")
-                        .content("""
-                                {
-                                "username": "someUser",
-                                "password": "somePassword"
-                                }
-                                """.trim())
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value("someUser"))
-                .andExpect(jsonPath("$.created").value(true))
-                .andExpect(jsonPath("$.id").exists());
-
         //step 6: user tried to get JWT token by requesting POST /token with username=someUser, password=somePassword and system returned OK(200) and jwttoken=AAAA.BBBB.CCC
         // given & when
-        ResultActions successLoginRequest = mockMvc.perform(post("/token")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content("""
-                        {
-                        "username": "someUser",
-                        "password": "somePassword"
-                        }
-                        """.trim())
-        );
+        String token = registerTestUserAndLogHimInAndGetHisToken();
 
-        String loginResponseJson = successLoginRequest
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("someUser"))
-                .andExpect(jsonPath("$.token").exists())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        String token = JsonPath.read(loginResponseJson, "$.token");
-
+        // then
         assertThat(token).matches(Pattern.compile("^([A-Za-z0-9-_=]+\\.)+([A-Za-z0-9-_=])+\\.?$"));
 
         //step 7: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 0 offers
@@ -125,19 +91,14 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
                 .andExpect(jsonPath("$").isEmpty());
 
         //step 8: there are 4 new offers in external HTTP server
-        wireMockServer.stubFor(WireMock.get("/offers")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBody(bodyWithFourOffersJson())
-                ));
+        createStubMockServer(bodyWithFourOffersJson());
 
         //step 9: scheduler ran 2nd time and made GET to external server and system added 4 new offers
         // given & when
-        List<OfferResponseDto> newOffers = scheduler.fetchAllOffers();
+        List<OfferResponseDto> allOffersAfterAddingFour = scheduler.fetchAllOffers();
 
         // then
-        assertThat(newOffers).hasSize(4);
+        assertThat(allOffersAfterAddingFour).hasSize(4);
 
         //step 10: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 4 offers
         // when & then
@@ -177,19 +138,14 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
                 .andExpect(jsonPath("$.title").value("Junior Java Developer NOWA"));
 
         //step 13: there are 2 new offers in external HTTP server
-        wireMockServer.stubFor(WireMock.get("/offers")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBody(bodyWithTwoOffersJson())
-                ));
+        createStubMockServer(bodyWithTwoOffersJson());
 
         //step 14: scheduler ran 3rd time and made GET to external server and system added 2 new offers
         // given & when
-        List<OfferResponseDto> twoNewOffers = scheduler.fetchAllOffers();
+        List<OfferResponseDto> allOffersAfterAddingTwo = scheduler.fetchAllOffers();
 
         //then
-        assertThat(twoNewOffers).hasSize(6);
+        assertThat(allOffersAfterAddingTwo).hasSize(6);
 
         //step 15: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 6 offers
         // when & then

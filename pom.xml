@@ -39,6 +39,7 @@
         <wiremock-jre8.version>2.35.0</wiremock-jre8.version>
         <awaitility.version>4.3.0</awaitility.version>
         <java-jwt.version>4.0.0</java-jwt.version>
+        <spring-data-redis.version>2.4.5</spring-data-redis.version>
     </properties>
 
     <dependencies>
@@ -147,6 +148,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!--  REDIS -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>${spring-data-redis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
         </dependency>
 
 
