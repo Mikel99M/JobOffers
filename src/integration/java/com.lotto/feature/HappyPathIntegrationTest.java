@@ -84,9 +84,7 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
 
         //step 7: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 0 offers
         // when & then
-        mockMvc.perform(get("/offers")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        performGetActionWithToken("/offers", token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
 
@@ -102,9 +100,7 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
 
         //step 10: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 4 offers
         // when & then
-        ResultActions getOffersAction = mockMvc.perform(get("/offers")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        ResultActions getOffersAction = performGetActionWithToken("/offers", token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(4))
                 .andExpect(jsonPath("$[0].title").value("Junior Java Developer NOWA"))
@@ -122,18 +118,15 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
 
         //step 11: user made GET /offers/9999 and system returned NOT_FOUND(404) with message “Offer with id 9999 not found”
         // when & then
-        mockMvc.perform(get("/offers/9999")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        performGetActionWithToken("/offers/9999", token)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("No offer found with id: 9999"))
                 .andExpect(jsonPath("$.status").value("NOT_FOUND"));
 
         //step 12: user made GET /offers/{first offer id} and system returned OK(200) with offer
         // when & then
-        mockMvc.perform(get("/offers/%s".formatted(firstOfferId))
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+        performGetActionWithToken("/offers/%s".formatted(firstOfferId), token)
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(firstOfferId))
                 .andExpect(jsonPath("$.title").value("Junior Java Developer NOWA"));
 
@@ -149,9 +142,7 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
 
         //step 15: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 6 offers
         // when & then
-        mockMvc.perform(get("/offers")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        performGetActionWithToken("/offers", token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(6))
                 .andExpect(jsonPath("$[0].title").value("Junior Java Developer NOWA"))
@@ -183,9 +174,7 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
 
         //step 17: user made GET /offers with header “Authorization: Bearer AAAA.BBBB.CCC” and system returned OK(200) with 7 offers
         // when & then
-        mockMvc.perform(get("/offers")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        performGetActionWithToken("/offers", token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(7))
                 .andExpect(jsonPath("$[6].title").value("title 1"))

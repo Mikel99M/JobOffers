@@ -24,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-@SpringBootTest(classes = JobOffersApplication.class, properties = {"spring.cache.type=redis", "spring.cache.type=none"})
+@SpringBootTest(classes = JobOffersApplication.class, properties = {"spring.cache.type=redis", "spring.task.scheduling.enabled=false"})
 public class RedisOffersCacheIntegrationTest extends BaseIntegrationTest implements SampleOfJobResponse {
 
     @Container
@@ -82,5 +82,4 @@ public class RedisOffersCacheIntegrationTest extends BaseIntegrationTest impleme
                         }
                 );
     }
-
 }

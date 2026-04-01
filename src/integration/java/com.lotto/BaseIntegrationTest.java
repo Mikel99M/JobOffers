@@ -20,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +49,12 @@ public class BaseIntegrationTest {
         registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
         registry.add("offers.http.client.config.port", () -> wireMockServer.getPort());
         registry.add("offers.http.client.config.uri", () -> WIRE_MOCK_HOST);
+    }
+
+    public ResultActions performGetActionWithToken(String url, String token) throws Exception {
+        return mockMvc.perform(get(url)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON));
     }
 
     public String registerTestUserAndLogHimInAndGetHisToken() throws Exception {
