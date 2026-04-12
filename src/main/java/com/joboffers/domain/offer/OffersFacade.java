@@ -1,6 +1,7 @@
 package com.joboffers.domain.offer;
 
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public class OffersFacade {
     private final OfferMapperInterface offerMapper;
     private final OfferService offerService;
 
+    @CacheEvict(value = "jobOffers", allEntries = true)
     public OfferResponseDto addOffer(OfferRequestDto offerDto) {
         Offer offer = offerMapper.mapOfferRequestDtoToOffer(offerDto);
         Offer savedOffer = offerRepository.save(offer);
@@ -38,6 +40,7 @@ public class OffersFacade {
         offerRepository.save(offer);
     }
 
+    @CacheEvict(value = "jobOffers", allEntries = true)
     public void deleteOfferById(String id) {
         offerRepository.deleteById(id);
     }
