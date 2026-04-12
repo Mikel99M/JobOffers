@@ -5,6 +5,7 @@ import com.joboffers.domain.offer.OfferResponseDto;
 import com.joboffers.domain.offer.OffersFacade;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,12 @@ public class OfferController {
     public ResponseEntity<OfferResponseDto> addNewOffer(@RequestBody OfferRequestDto request) {
         OfferResponseDto response = offersFacade.addOffer(request);
         return ResponseEntity.status(201).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOffer(@PathVariable String id) {
+        offersFacade.deleteOfferById(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
