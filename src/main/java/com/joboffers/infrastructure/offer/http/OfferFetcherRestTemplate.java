@@ -56,7 +56,7 @@ public class OfferFetcherRestTemplate implements OfferFetchable {
 
     private String getUrlForService() {
         return UriComponentsBuilder
-                .fromHttpUrl(properties.uri()) // http://ec2-3-127-218-34.eu-central-1.compute.amazonaws.com
+                .fromHttpUrl(properties.uri()) // ec2-18-194-181-208.eu-central-1.compute.amazonaws.com
                 .port(properties.port())       // 5057
                 .path("/offers")               // /offers
                 .toUriString();
