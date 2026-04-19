@@ -6,25 +6,23 @@ import com.joboffers.domain.loginandregister.RegistrationResultDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
 public class RegisterController {
 
     private final LoginAndRegisterFacade facade;
-    private final PasswordEncoder encoder;
 
     @PostMapping("/register")
-    public ResponseEntity<RegistrationResultDto> register(@RequestBody RegisterRequestDto registerRequest) {
-        String encodedPassword = encoder.encode(registerRequest.password());
+    public ResponseEntity<RegistrationResultDto> register(@Valid @RequestBody RegisterRequestDto registerRequest) {
         RegistrationResultDto registerResult = facade.register(
-                new RegisterRequestDto(registerRequest.username(), encodedPassword)
+                new RegisterRequestDto(registerRequest.username(), registerRequest.password())
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(registerResult);
     }
-
 }

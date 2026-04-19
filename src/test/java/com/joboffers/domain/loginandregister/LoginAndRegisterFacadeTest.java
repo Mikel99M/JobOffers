@@ -3,6 +3,8 @@ package com.joboffers.domain.loginandregister;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -11,17 +13,20 @@ public class LoginAndRegisterFacadeTest {
 
     private UserRepositoryStub stubRepo;
     private LoginAndRegisterFacade facade;
+    private PasswordEncoder encoder;
 
     @BeforeEach
     void setup() {
         stubRepo = new UserRepositoryStub();
-        facade = new LoginAndRegisterFacade(stubRepo);
+        encoder = new BCryptPasswordEncoder();
+        facade = new LoginAndRegisterFacade(stubRepo, encoder);
     }
 
     @Test
     void should_Register_User_When_User_Does_Not_Exist() {
         // given
-        RegisterRequestDto requestDto = new RegisterRequestDto("John", "pass");
+        String plainPassword = "pass";
+        RegisterRequestDto requestDto = new RegisterRequestDto("John", plainPassword);
 
         // when
         facade.register(requestDto);
@@ -29,7 +34,7 @@ public class LoginAndRegisterFacadeTest {
         // then
         User user = stubRepo.findByUserName("John").orElseThrow(() -> new UserNotFoundException("User not found"));
         assertThat(user.getUsername()).isEqualTo("John");
-        assertThat(user.getPassword()).isEqualTo("pass");
+        assertThat(encoder.matches(plainPassword, user.getPassword())).isTrue();
     }
 
     @Test
@@ -37,21 +42,18 @@ public class LoginAndRegisterFacadeTest {
         // given
         User existing = User.builder()
                 .email("john@example.com")
-                .userName("Old John")
+                .userName("John")
                 .password("old")
                 .build();
 
         stubRepo.save(existing);
         RegisterRequestDto req = new RegisterRequestDto("John", "pass");
 
-        // when
-        facade.register(req);
-
-        // then
-        User user = stubRepo.findByEmail("john@example.com").orElseThrow();
-        assertThat("Old John").isEqualTo(user.getUsername());
-        assertThat("old").isEqualTo(user.getPassword());
+        // when & then
         assertThatThrownBy(() -> facade.register(req)).isInstanceOf(UserAlreadyExistsException.class);
+        User user = stubRepo.findByEmail("john@example.com").orElseThrow();
+        assertThat("John").isEqualTo(user.getUsername());
+        assertThat("old").isEqualTo(user.getPassword());
     }
 
     @Test
@@ -96,8 +98,9 @@ public class LoginAndRegisterFacadeTest {
     @Test
     void should_Throw_When_Deleting_Non_Existing_User() {
         // when & then
-        assertThatThrownBy(() -> facade.findByEmail("john@example.com"))
-                .isInstanceOf(BadCredentialsException.class);
+        DeleteRequestDto req = new DeleteRequestDto("pass", "john@example.com");
+        assertThatThrownBy(() -> facade.deleteUser(req))
+                .isInstanceOf(UserNotFoundException.class);
     }
 
     @Test

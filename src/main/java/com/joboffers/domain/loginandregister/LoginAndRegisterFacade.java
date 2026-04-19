@@ -2,20 +2,25 @@ package com.joboffers.domain.loginandregister;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
 public class LoginAndRegisterFacade {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
 
     public RegistrationResultDto register(RegisterRequestDto requestDto) {
 
+        String encodedPassword = encoder.encode(requestDto.password());
+
         if (!userRepository.existsByUserName(requestDto.username())) {
             User user = User.builder()
-                    .email(requestDto.username())
-                    .password(requestDto.password())
+                    .id(UUID.randomUUID().toString())
+                    .password(encodedPassword)
                     .userName(requestDto.username())
                     .build();
             User savedUser = userRepository.save(user);
