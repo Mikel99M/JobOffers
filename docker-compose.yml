@@ -1,4 +1,17 @@
 services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://root:example@mongo:27017/JobOffers-web?authSource=admin
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+
   mongo:
     image: mongo:7.0
     restart: always
@@ -8,8 +21,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: JobOffers-web
-    volumes:
-      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
 
   mongo-express:
     image: mongo-express
@@ -24,7 +35,7 @@ services:
   redis:
     image: redis
     ports:
-      - "63792:6379"
+      - "6379:6379"
     restart: always
 
   redis-commander:
