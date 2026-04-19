@@ -2,6 +2,8 @@ package com.joboffers.domain.offer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 
@@ -28,17 +30,18 @@ public class OfferServiceTest {
         repository.save(existingOffer);
 
         fetcher.setRemoteOffers(List.of(
-                new JobOfferResponse("Title 1", "Comp 1", "1", "url2"),
-                new JobOfferResponse("Title 2", "Comp 2", "2", "url3")
+                new JobOfferResponse("Title 1", "Comp 1", "1", "url1"),
+                new JobOfferResponse("Title 2", "Comp 2", "2", "url2")
         ));
 
         // when
         List<Offer> result = offerService.fetchAllOffersAndSaveIfNotExists();
 
         // then
-        assertThat(result).hasSize(3);
-        assertThat(result.get(1).getOfferUrl()).isEqualTo("url2");
-        assertThat(result.get(2).getOfferUrl()).isEqualTo("url3");
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting(Offer::getOfferUrl)
+                .containsExactlyInAnyOrder("url1", "url2");
     }
 
     @Test
@@ -55,7 +58,9 @@ public class OfferServiceTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(Offer::isActive);
-        assertThat(result.get(1).getOfferUrl()).isEqualTo("url2");
+        assertThat(result)
+                .extracting(Offer::getOfferUrl)
+                .containsExactlyInAnyOrder("url1", "url2");
     }
 
     @Test
@@ -73,5 +78,33 @@ public class OfferServiceTest {
 
         // then
         assertThat(repository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void should_return_existing_offers_when_external_service_throws_rest_client_exception() {
+        // given
+        repository.save(Offer.builder().offerUrl("db-url").isActive(true).build());
+        fetcher.setToThrow(new RestClientException("service unavailable"));
+
+        // when
+        List<Offer> result = offerService.fetchAllOffersAndSaveIfNotExists();
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(Offer::getOfferUrl).containsExactly("db-url");
+    }
+
+    @Test
+    void should_return_existing_offers_when_external_service_times_out() {
+        // given
+        repository.save(Offer.builder().offerUrl("db-url").isActive(true).build());
+        fetcher.setToThrow(new ResourceAccessException("Read timed out"));
+
+        // when
+        List<Offer> result = offerService.fetchAllOffersAndSaveIfNotExists();
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(Offer::getOfferUrl).containsExactly("db-url");
     }
 }

@@ -11,6 +11,8 @@ import com.lotto.SampleOfJobResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -59,11 +61,15 @@ public class OfferFetcherRestTemplateTest implements SampleOfJobResponse {
 
     @Test
     void should_throw_service_unavailable_when_external_service_returns_404() {
+        // given
+        wireMockServer.stubFor(WireMock.get("/offers")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(404)));
+
         //  then
         assertThatThrownBy(() -> offerFetcher.fetchOffers())
                 .isInstanceOf(ResponseStatusException.class)
-                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE)
-                .hasMessageContaining("External offer service failed");
+                .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -77,13 +83,12 @@ public class OfferFetcherRestTemplateTest implements SampleOfJobResponse {
 
         // then
         assertThatThrownBy(() -> offerFetcher.fetchOffers())
-                .isInstanceOf(ResponseStatusException.class)
-                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE)
-                .hasMessageContaining("External offer service failed");
+                .isExactlyInstanceOf(ResourceAccessException.class)
+                .hasMessageContaining("Read timed out");
     }
 
     @Test
-    void should_throw_exception_503_when_fault_empty_response() {
+    void should_throw_resource_access_exception_when_fault_empty_response() {
         // given
         wireMockServer.stubFor(WireMock.get("/offers")
                 .willReturn(WireMock.aResponse()
@@ -91,9 +96,8 @@ public class OfferFetcherRestTemplateTest implements SampleOfJobResponse {
 
         // then
         assertThatThrownBy(() -> offerFetcher.fetchOffers())
-                .isInstanceOf(ResponseStatusException.class)
-                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE)
-                .hasMessageContaining("External offer service failed");
+                .isInstanceOf(ResourceAccessException.class)
+                .hasMessageContaining("I/O error on GET request");
     }
 
     @Test
@@ -114,7 +118,7 @@ public class OfferFetcherRestTemplateTest implements SampleOfJobResponse {
     }
 
     @Test
-    void should_throw_503_when_external_service_returns_invalid_json_format() {
+    void should_throw_rest_client_exception_when_external_service_returns_invalid_json_format() {
         // given
         wireMockServer.stubFor(WireMock.get("/offers")
                 .willReturn(WireMock.aResponse()
@@ -125,9 +129,34 @@ public class OfferFetcherRestTemplateTest implements SampleOfJobResponse {
 
         // when & then
         assertThatThrownBy(() -> offerFetcher.fetchOffers())
+                .isInstanceOf(RestClientException.class)
+                .hasMessageContaining("Error while extracting response");
+    }
+
+    @Test
+    void should_throw_internal_server_error_when_external_service_returns_500() {
+        // given
+        wireMockServer.stubFor(WireMock.get("/offers")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(500)));
+
+        // when & then
+        assertThatThrownBy(() -> offerFetcher.fetchOffers())
                 .isInstanceOf(ResponseStatusException.class)
-                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE)
-                .hasMessageContaining("External offer service failed");
+                .hasFieldOrPropertyWithValue("status", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void should_throw_unauthorized_when_external_service_returns_401() {
+        // given
+        wireMockServer.stubFor(WireMock.get("/offers")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(401)));
+
+        // when & then
+        assertThatThrownBy(() -> offerFetcher.fetchOffers())
+                .isInstanceOf(ResponseStatusException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.UNAUTHORIZED);
     }
 
 }

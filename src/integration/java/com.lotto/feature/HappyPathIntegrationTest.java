@@ -181,4 +181,28 @@ public class HappyPathIntegrationTest extends BaseIntegrationTest implements Sam
                 .andExpect(jsonPath("$[6].company").value("company 1"))
                 .andExpect(jsonPath("$[6].isActive").value(true));
     }
+
+    @Test
+    void should_return_409_when_register_username_already_exists() throws Exception {
+        // given
+        String requestBody = """
+                {
+                  "username": "duplicateUser",
+                  "password": "somePassword"
+                }
+                """.trim();
+
+        mockMvc.perform(post("/register")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+
+        // when & then
+        mockMvc.perform(post("/register")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Username is already in use"))
+                .andExpect(jsonPath("$.status").value("CONFLICT"));
+    }
 }
