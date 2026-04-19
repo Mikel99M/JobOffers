@@ -1,6 +1,5 @@
 package com.joboffers.domain.loginandregister;
 
-import com.joboffers.domain.offer.Offer;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -17,8 +16,7 @@ record User(
         @Id String id,
         @Indexed(unique = true) String userName,
         String email,
-        String password,
-        List<Offer> offersAppliedFor
+        String password
 ) implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
