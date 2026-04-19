@@ -2,14 +2,14 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-      uri: mongodb://root:example@localhost:27017/JobOffers-web?authSource=admin
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://root:example@localhost:27017/JobOffers-web?authSource=admin}
   task:
     scheduling:
       enabled: false
 
   redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:63792}
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
   cache:
     type: redis
     redis:
