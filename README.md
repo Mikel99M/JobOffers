@@ -35,9 +35,9 @@ Security: Spring Security + JWT (Stateless Authentication)
 
 Database: MongoDB (Persistent storage for job offers and users)
 
-Caching: Redis (Performance optimization for frequently accessed offers)
+Caching: Redis
 
-Testing: JUnit 5, Mockito, MockMvc, Testcontainers (Mongo/Redis), WireMock (External API Mocking)
+Testing: JUnit 5, Mockito, MockMvc, Testcontainers (Mongo/Redis), WireMock
 
 DevOps: Docker, Docker Compose
 
